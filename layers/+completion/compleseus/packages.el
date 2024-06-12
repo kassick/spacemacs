@@ -31,6 +31,9 @@
     consult-yasnippet
     embark
     embark-consult
+    (helm-make :location (recipe :fetcher github
+                                 :repo "myrgy/helm-make"
+                                 :branch "add_emacs_completion"))
     orderless
     persp-mode
     (selectrum :toggle (eq compleseus-engine 'selectrum))
@@ -49,13 +52,24 @@
            spacemacs--symbol-highlight-transient-state-doc
            "  Search: [_s_] consult-line  [_f_] files  [_/_] project"))
     (spacemacs/transient-state-register-add-bindings 'symbol-highlight
-      '(("s" spacemacs/consult-line :exit t)
-        ("f" spacemacs/compleseus-search-auto :exit t)
-        ("/" spacemacs/compleseus-search-projectile :exit t)))))
+      '(("s" spacemacs/consult-line-symbol :exit t)
+        ("f" spacemacs/compleseus-search-auto-symbol :exit t)
+        ("/" spacemacs/compleseus-search-projectile-symbol :exit t)))))
 
 (defun compleseus/post-init-imenu ()
   (spacemacs/set-leader-keys "ji" 'spacemacs/consult-jump-in-buffer)
   (spacemacs/set-leader-keys "sj" 'spacemacs/consult-jump-in-buffer))
+
+(defun compleseus/init-helm-make ()
+  (use-package helm-make
+    :defer t
+    :init
+    ;; TODO: Ideally, this should use vertico instead, but helm-make can't do
+    ;; that yet: blocked on https://github.com/abo-abo/helm-make/pull/62
+    (setq helm-make-completion-method 'emacs)
+    (spacemacs/set-leader-keys
+      "cc" 'helm-make-projectile
+      "cm" 'helm-make)))
 
 (defun compleseus/init-marginalia ()
   (use-package marginalia
@@ -281,6 +295,8 @@
     (which-key-add-keymap-based-replacements minibuffer-local-map "C-z" "Embark actions...")
     :config
     (define-key embark-file-map "s" 'spacemacs/compleseus-search-from)
+    (define-key embark-buffer-map "s" #'spacemacs/embark-consult-line-multi)
+    (add-to-list 'embark-multitarget-actions #'spacemacs/embark-consult-line-multi)
     ;; which key integration setup
     ;; https://github.com/oantolin/embark/wiki/Additional-Configuration#use-which-key-like-a-key-menu-prompt
     (setq embark-indicators
