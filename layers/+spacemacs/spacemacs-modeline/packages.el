@@ -26,7 +26,7 @@
         anzu
         (doom-modeline :toggle (eq (spacemacs/get-mode-line-theme-name) 'doom))
         fancy-battery
-        spaceline
+        (spaceline :toggle (not (eq (spacemacs/get-mode-line-theme-name) 'vanilla)))
         (spaceline-all-the-icons :toggle (eq (spacemacs/get-mode-line-theme-name) 'all-the-icons))
         symon
         (vim-powerline :location (recipe :fetcher local))))
