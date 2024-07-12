@@ -34,7 +34,7 @@
 (defun spacemacs-purpose/pre-init-eyebrowse ()
   (spacemacs|use-package-add-hook eyebrowse
     :post-config
-    (progn
+    (with-eval-after-load 'spacemacs-purpose-popwin
       (add-hook 'purpose-mode-hook #'spacemacs/window-purpose-sync-eyebrowse)
       ;; sync with eyebrowse now
       (spacemacs/window-purpose-sync-eyebrowse))))
