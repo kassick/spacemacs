@@ -185,7 +185,7 @@ Example: (evil-map visual \"<\" \"<gv\")"
                    (execute-kbd-macro ,(substring seq 1)))
               (execute-kbd-macro ,seq)))))))
 
-(defun spacemacs/diminish-hook (_)
+(defun spacemacs/diminish-hook (&rest _)
   "Display diminished lighter in vanilla Emacs mode-line."
   (let ((unicodep (dotspacemacs|symbol-value
                    dotspacemacs-mode-line-unicode-symbols)))
