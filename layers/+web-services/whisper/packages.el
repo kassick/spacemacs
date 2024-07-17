@@ -1,8 +1,8 @@
-;;; packages.el --- systemd layer packages file for Spacemacs.
+;;; packages.el --- whisper layer packages file for Spacemacs.
 ;;
 ;; Copyright (c) 2012-2024 Sylvain Benner & Contributors
 ;;
-;; Author: Fabien Dubosson <fabien.dubosson@gmail.com>
+;; Author: Alexander Matyasko <amatyasko@amatyasko-PC>
 ;; URL: https://github.com/syl20bnr/spacemacs
 ;;
 ;; This file is not part of GNU Emacs.
@@ -20,31 +20,18 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+(defconst whisper-packages
+  '((whisper :location (recipe
+                        :fetcher github
+                        :repo "natrys/whisper.el"))))
 
-(defconst systemd-packages
-  '(
-    flycheck
-    systemd
-    journalctl-mode)
-  "The list of Lisp packages required by the systemd layer.")
-
-(defun systemd/post-init-flycheck ()
-  (spacemacs/enable-flycheck 'systemd-mode))
-
-(defun systemd/init-systemd ()
-  (use-package systemd
+(defun whisper/init-whisper ()
+  (use-package whisper
     :defer t
-    :init (setq systemd-use-company-p
-                (configuration-layer/package-used-p 'company))
-    :config (spacemacs/set-leader-keys-for-major-mode 'systemd-mode
-              "hd" 'systemd-doc-directives
-              "ho" 'systemd-doc-open)))
-
-(defun systemd/init-journalctl-mode ()
-  (use-package journalctl-mode
-    :ensure t
     :init
+    (spacemacs/declare-prefix "$w" "Whisper")
     (spacemacs/set-leader-keys
-      "atj" 'journalctl)))
-
-;;; packages.el ends here
+      "$wr" 'whisper-run ; Start recording and transcribe/translate audio
+      "$wf" 'whisper-file-run ; Transcribe/translate a local file
+      "$wl" 'spacemacs/whisper-select-language ; Select transcription language
+      "$wm" 'spacemacs/whisper-select-model))) ; Select base model for transcription
