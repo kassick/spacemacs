@@ -510,8 +510,7 @@ fix this issue."
    :python-layer
    (purpose-conf
     :mode-purposes '((inferior-python-mode . repl))
-    :name-purposes '(("*compilation*" . logs)
-                     ("*Pylookup Completions*" . help))
+    :name-purposes '(("*Pylookup Completions*" . help))
     :regexp-purposes '(("^\\*Anaconda" . help)
                        ("^\\*Pydoc" . help)
                        ("^\\*live-py" . logs)))))
