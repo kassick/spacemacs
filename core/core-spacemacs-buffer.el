@@ -1070,12 +1070,11 @@ GROUPED-LIST: a list of string pathnames made interactive in this function."
                                      (all-the-icons-octicon "radio-tower" :height 0.8 :v-adjust -0.05)
                                    (all-the-icons-icon-for-file (file-name-nondirectory el) :height 0.8 :v-adjust -0.05)))
                                " "))
-                             (button-text-filename (abbreviate-file-name el)))
+                             (button-text-filename (string-trim-left (expand-file-name el)
+                                                                     (regexp-quote (car group)))))
                         (insert button-prefix)
                         (widget-create 'push-button
-                                       :action `(lambda (&rest ignore)
-                                                  (find-file-existing
-                                                   (concat ,(car group) ,el)))
+                                       :action `(lambda (&rest ignore) (find-file-existing ,el))
                                        :mouse-face 'highlight
                                        :follow-link "\C-m"
                                        :button-prefix ""
@@ -1240,7 +1239,7 @@ LIST: list of `org-agenda' entries in the todo list."
 
 (defun spacemacs-buffer//associate-to-project (recent-file by-project)
   (dolist (x by-project)
-    (when (string-prefix-p (car x) recent-file)
+    (when (string-prefix-p (car x) (expand-file-name recent-file))
       (setcdr x (cons (string-remove-prefix (car x) recent-file) (cdr x))))))
 
 (defun spacemacs-buffer//recent-files-by-project ()
@@ -1293,23 +1292,23 @@ LIST-SIZE is specified in `dotspacemacs-startup-lists' for recent entries."
   (let (;; we need to remove `org-agenda-files' entries from recent files
         (agenda-files
          (when-let* ((default-directory
-                     (or (bound-and-true-p org-directory) "~/org"))
-                    (files
-                     (when (bound-and-true-p org-agenda-files)
-                       (if (listp org-agenda-files)
-                           ;; if it's a list, we take that value directly
-                           org-agenda-files
-                         ;; but if it's a string, it must be file where the list
-                         ;; of agenda files are stored in that file and we have
-                         ;; to load `org-agenda' to process the list. If org is
-                         ;; already loaded, then we assume that the user has
-                         ;; already called org-agenda-files.
-                         (when (not (featurep 'org))
-                           (warn "`org-agenda-files' is a string and \
+                      (or (bound-and-true-p org-directory) "~/org"))
+                     (files
+                      (when (bound-and-true-p org-agenda-files)
+                        (if (listp org-agenda-files)
+                            ;; if it's a list, we take that value directly
+                            org-agenda-files
+                          ;; but if it's a string, it must be file where the list
+                          ;; of agenda files are stored in that file and we have
+                          ;; to load `org-agenda' to process the list. If org is
+                          ;; already loaded, then we assume that the user has
+                          ;; already called org-agenda-files.
+                          (when (not (featurep 'org))
+                            (warn "`org-agenda-files' is a string and \
 not a list. This requires us to load `org' to process the org agenda files in \
 startup list.")
-                           (require 'org)
-                           (org-agenda-files))))))
+                            (require 'org)
+                            (org-agenda-files))))))
            (mapcar #'expand-file-name files)))
         ;; we also need to skip sub-directories of `org-directory'
         (ignore-directory (when (bound-and-true-p org-directory)
@@ -1601,7 +1600,7 @@ If a prefix argument is given, switch to it in an other, possibly new window."
             (when dotspacemacs-startup-lists
               (spacemacs-buffer/insert-startup-lists))
             (spacemacs-buffer//insert-footer)
-            (configuration-layer/display-summary emacs-start-time)
+            (configuration-layer/display-summary)
             (spacemacs-buffer/set-mode-line spacemacs--default-mode-line)
             (force-mode-line-update)
             (spacemacs-buffer-mode)))
@@ -1660,8 +1659,8 @@ This function is intended to be used in `spacemacs-buffer-mode' only."
       (widget-button-press (point))
     ;; point on an entry, press it
     (if-let* ((button (save-excursion
-                       (beginning-of-line-text)
-                       (re-search-forward "[0-9]* +. " (point-at-eol) 'noerror))))
+                        (beginning-of-line-text)
+                        (re-search-forward "[0-9]* +. " (point-at-eol) 'noerror))))
         (widget-button-press button)
       ;; go to next line
       (forward-line)

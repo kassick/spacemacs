@@ -293,8 +293,6 @@
     (kaolin-temple                    . kaolin-themes)
     (kaolin-valley-dark               . kaolin-themes)
     (kaolin-valley-light              . kaolin-themes)
-    (majapahit-dark                   . majapahit-themes)
-    (majapahit-light                  . majapahit-themes)
     (material-light                   . material-theme)
     (mccarthy                         . sublime-themes)
     (minimal-light                    . minimal-theme)
@@ -451,7 +449,7 @@ THEME."
     (setq spacemacs--cur-theme theme-name)
     (unless (display-graphic-p)
       (spacemacs|do-after-display-system-init
-       (load-theme theme-name t)))))
+        (load-theme theme-name t)))))
 
 (defun spacemacs/cycle-spacemacs-theme (&optional backward)
   "Cycle through themes defined in `dotspacemacs-themes'.
