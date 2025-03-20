@@ -745,52 +745,6 @@ suppress this warning.")))
       (buffer-disable-undo)
       (fundamental-mode))))
 
-(defun spacemacs/delete-window (&optional winum)
-  "Delete the current window.
-If numerical prefix WINUM, kill window number ARG."
-  (interactive "P")
-  (when (and winum (not (integerp winum)))
-    (user-error "Prefix WINUM must be an integer or nil"))
-  (delete-window (when winum (winum-get-window-by-number winum))))
-
-;; Adapted from kill-buffer-and-window
-(defun spacemacs/kill-buffer-and-window (&optional winum)
-  "Kill the current buffer and delete the selected window.
-If numerical prefix WINUM, kill window number ARG and its current
-buffer."
-  (interactive "P")
-  (when (and winum (not (integerp winum)))
-      (user-error "Prefix WINUM must be an integer or nil"))
-  (let* ((window-to-delete (if winum
-                               (winum-get-window-by-number winum)
-                             (selected-window)))
-	 (buffer-to-kill (window-buffer window-to-delete))
-	 (delete-window-hook (lambda () (ignore-errors (delete-window)))))
-    (unwind-protect
-	(with-selected-window window-to-delete
-	  (add-hook 'kill-buffer-hook delete-window-hook t t)
-	  (if (kill-buffer (current-buffer))
-	      ;; If `delete-window' failed before, we rerun it to regenerate
-	      ;; the error so it can be seen in the echo area.
-	      (when (eq (selected-window) window-to-delete)
-		(delete-window))))
-      ;; If the buffer is not dead for some reason (probably because
-      ;; of a `quit' signal), remove the hook again.
-      (ignore-errors
-        (with-current-buffer buffer-to-kill
-	  (remove-hook 'kill-buffer-hook delete-window-hook t))))))
-
-;; our own implementation of kill-this-buffer from menu-bar.el
-(defun spacemacs/kill-this-buffer (&optional arg)
-  "Kill the current buffer.
-If the universal prefix argument is used then kill also the window."
-  (interactive "P")
-  (if (window-minibuffer-p)
-      (abort-recursive-edit)
-    (if (equal '(4) arg)
-        (kill-buffer-and-window)
-      (kill-buffer))))
-
 ;; found at http://emacswiki.org/emacs/KillingBuffers
 (defun spacemacs/kill-other-buffers (&optional arg)
   "Kill all other buffers.
@@ -990,6 +944,16 @@ variable."
         (ignore-errors
           (with-current-buffer b
             (ediff-delete-temp-files)))))))
+
+(defvar spacemacs//ediff-saved-window-configuration nil)
+
+(defun spacemacs//ediff-save-window-configuration ()
+  (setq spacemacs//ediff-saved-window-configuration
+        (current-window-configuration)))
+
+(defun spacemacs//ediff-restore-window-configuration ()
+  (when spacemacs//ediff-saved-window-configuration
+    (set-window-configuration spacemacs//ediff-saved-window-configuration)))
 
 (defun spacemacs/new-empty-buffer (&optional split)
   "Create a new buffer called: \"untitled\".
