@@ -243,7 +243,7 @@
    ("9" buffer-to-window-9 "Move buffer to window 9")
    ("C-d" spacemacs/kill-other-buffers "Kill other buffers...")
    ("C-S-d" spacemacs/kill-matching-buffers-rudely "Kill buffers...")
-   ("d" spacemacs/kill-this-buffer "Kill buffer")
+   ("d" kill-current-buffer "Kill buffer")
    ("e" spacemacs/safe-erase-buffer "Erase...")
    ("h" spacemacs/home "Spacemacs home buffer")
    ("H" spacemacs/switch-to-help-buffer "Help buffer")
@@ -254,7 +254,7 @@
    ("R" revert-buffer "Revert buffer...")
    ("s" spacemacs/switch-to-scratch-buffer "Scratch buffer")
    ("u" spacemacs/reopen-killed-buffer "Reopen last killed buffer")
-   ("x" spacemacs/kill-buffer-and-window "Kill buffer and close window")
+   ("x" kill-buffer-and-window "Kill buffer and close window")
    ("Y" spacemacs/copy-whole-buffer-to-clipboard "Copy buffer")
    ("w" read-only-mode "Toggle read-only"))))
 ;; Cycling settings -----------------------------------------------------------
@@ -648,7 +648,7 @@ respond to this toggle."
   "w3"  'spacemacs/window-split-triple-columns
   "w4"  'spacemacs/window-split-grid
   "wb"  'spacemacs/switch-to-minibuffer-window
-  "wd"  'spacemacs/delete-window
+  "wd"  'delete-window
   "wt"  'spacemacs/toggle-current-window-dedication
   "wf"  'follow-mode
   "wF"  'make-frame
@@ -682,7 +682,7 @@ respond to this toggle."
   "wv"  'split-window-right
   "wV"  'split-window-right-and-focus
   "ww"  'other-window
-  "wx"  'spacemacs/kill-buffer-and-window
+  "wx"  'kill-buffer-and-window
   "w/"  'split-window-right
   "w="  'balance-windows-area
   "w+"  'spacemacs/window-layout-toggle
@@ -799,7 +799,7 @@ respond to this toggle."
               (ivy-switch-buffer))
              ((configuration-layer/layer-used-p 'compleseus)
               (spacemacs/compleseus-switch-to-buffer))))
-  ("d" spacemacs/kill-this-buffer)
+  ("d" kill-current-buffer)
   ("x" kill-buffer-and-window)
   ("C-d" bury-buffer)
   ("z" recenter-top-bottom)
