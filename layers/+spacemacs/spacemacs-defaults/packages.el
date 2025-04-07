@@ -42,8 +42,7 @@
     (image-mode :location built-in)
     (imenu :location built-in)
     (package-menu :location built-in)
-    ;; page-break-lines is shipped with spacemacs core
-    (page-break-lines :location built-in)
+    (page-break-lines :location local)
     (proced :location built-in)
     (process-menu :location built-in)
     quickrun
@@ -223,8 +222,7 @@
 
 (defun spacemacs-defaults/init-eldoc ()
   (use-package eldoc
-    :defer (spacemacs/defer)
-    :init (spacemacs|require-when-dumping 'eldoc)
+    :defer t
     :config
     ;; enable eldoc in `eval-expression'
     (add-hook 'eval-expression-minibuffer-setup-hook #'eldoc-mode)
@@ -340,9 +338,9 @@
     (define-advice display-line-numbers--turn-on (:before-while (&rest _) spacemacs//enable-line-numbers)
       (spacemacs/enable-line-numbers-p))
     (when dotspacemacs-line-numbers
-      ;; delay the initialization of number lines when opening Spacemacs
-      ;; normally. If opened via the command line with a file to visit then
-      ;; load it immediately
+      ;; delay the initialization of line numbers when opening Spacemacs
+      ;; normally. If opened via the command line with a file to visit then load
+      ;; it immediately
       (add-hook 'emacs-startup-hook
                 (lambda ()
                   (if (string-equal "*scratch*" (buffer-name))
@@ -386,14 +384,12 @@
 
 (defun spacemacs-defaults/init-recentf ()
   (use-package recentf
-    :defer (spacemacs/defer)
+    :defer t
     :commands (recentf-save-list)
     :init
-    (spacemacs|require-when-dumping 'recentf)
-    (when (spacemacs/defer)
-      (add-hook 'find-file-hook (lambda () (unless recentf-mode
-                                             (recentf-mode)
-                                             (recentf-track-opened-file)))))
+    (add-hook 'find-file-hook (lambda () (unless recentf-mode
+                                           (recentf-mode)
+                                           (recentf-track-opened-file))))
     ;; Do not leave dangling timers when reloading the configuration.
     (when (and (boundp 'recentf-auto-save-timer)
                (timerp recentf-auto-save-timer))
