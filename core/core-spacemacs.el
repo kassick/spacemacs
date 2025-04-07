@@ -1,6 +1,6 @@
 ;;; core-spacemacs.el --- Spacemacs Core File -*- lexical-binding: t -*-
 ;;
-;; Copyright (c) 2012-2024 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2025 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -83,14 +83,9 @@ the final step of executing code in `emacs-startup-hook'.")
            (package-desc-name pkg-desc) pkg-dir))))))
 
 (defun spacemacs//lookup-load-hints (file)
-  "Findout the `load-hints' items for the file."
-  (if-let* ((load-hints)
-            ((not (member (substring file 0 1) '("/" "~")))))
-      (seq-some
-       (lambda (row)
-         (when (member file (cdr row))                 ; prefix match
-           (car row)))
-       load-hints)))
+  "Findout the `load-hints' item for the FILE."
+  (unless (file-name-absolute-p file)
+    (car-safe (seq-find (lambda (row) (member file (cdr row))) load-hints))))
 
 (defun spacemacs//activate-load-hints ()
   "Enable the `load-hints' support for Spacemacs."
@@ -242,17 +237,6 @@ the final step of executing code in `emacs-startup-hook'.")
   (spacemacs/load-default-theme)
   ;; font
   (spacemacs|do-after-display-system-init
-    ;; If you are thinking to remove this call to `message', think twice. You'll
-    ;; break the life of several Spacemacser using Emacs in daemon mode. Without
-    ;; this, their chosen font will not be set on the *first* instance of
-    ;; emacsclient, at least if different than their system font. You don't
-    ;; believe me? Go ahead, try it. After you'll have notice that this was true,
-    ;; increase the counter bellow so next people will give it more confidence.
-    ;; Counter = 1
-    (let ((init-file-debug)) ;; without this font size is ignored in daemon
-      (when (daemonp)
-        (setq init-file-debug t))
-      (spacemacs-buffer/message "Setting the font..."))
     (unless (spacemacs/set-default-font dotspacemacs-default-font)
       (spacemacs-buffer/warning
        "Cannot find any of the specified fonts (%s)! Font settings may not be correct."
