@@ -1,6 +1,6 @@
 ;;; packages.el --- Org Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2024 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2025 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -506,7 +506,8 @@ Will work on both org-mode and any mode that accepts plain html."
       "ip" 'org-agenda-set-property
       "iP" 'org-agenda-priority
       "it" 'org-agenda-set-tags
-      "sr" 'org-agenda-refile)
+      "sr" 'org-agenda-refile
+      "TT" 'org-agenda-todo)
     (spacemacs|define-transient-state org-agenda
       :title "Org-agenda transient state"
       :on-enter (setq which-key-inhibit t)

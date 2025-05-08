@@ -1,6 +1,6 @@
 ;;; packages.el --- mu4e Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2024 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2025 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -49,7 +49,19 @@
           (persp-kill mu4e-spacemacs-layout-name))))))
 
 (defun mu4e/init-mu4e ()
+  ;; Some distributions do not construct the initial Emacs load paths properly
+  ;; so that packages are included in `package-directory-list' and thereby
+  ;; activated at startup.  To avoid breakage, now that Spacemacs defers loading
+  ;; mu4e, load `mu4e-autoloads' explicitly and issue a warning.
+  ;;
+  ;; See https://github.com/syl20bnr/spacemacs/issues/16931
+  (unless (featurep 'mu4e-autoloads)
+    (spacemacs-buffer/warning "`mu4e-autoloads' was not provided at startup.  Please ensure `mu4e' is installed and activated correctly.
+
+See https://github.com/syl20bnr/spacemacs/issues/16931#issuecomment-2767608202.")
+    (require 'mu4e-autoloads))
   (use-package mu4e
+    :defer t
     :init
     (spacemacs/set-leader-keys "aem" 'mu4e)
     (setq mail-user-agent 'mu4e-user-agent
@@ -95,11 +107,6 @@
       "a" 'message-kill-buffer
       "s" 'message-dont-send         ; saves as draft
       "f" 'mml-attach-file)
-
-    (when mu4e-enable-async-operations
-      (require 'smtpmail-async)
-      (setq send-mail-function         'async-smtpmail-send-it
-            message-send-mail-function 'async-smtpmail-send-it))
 
     (when (fboundp 'imagemagick-register-types)
       (imagemagick-register-types))
