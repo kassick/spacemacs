@@ -344,8 +344,12 @@ is ignored."
        (cfgl-package-enabled-p pkg inhibit-messages)))
 
 (cl-defmethod cfgl-package-distant-p ((pkg cfgl-package))
-  "Return non-nil if PKG is a distant package (i.e. not built-in Emacs)."
-  (and (not (memq (oref pkg location) '(built-in local)))
+  "Return non-nil if PKG is a distant package (i.e. not built-in Emacs).
+
+Site packages are not built-in to Emacs itself but instead must be
+provided with the Emacs distribution (site-lisp).  We do not consider
+them distant,to avoid attempting and failing to install them from ELPA."
+  (and (not (memq (oref pkg location) '(built-in site local)))
        (not (stringp (oref pkg location)))))
 
 (cl-defmethod cfgl-package-get-safe-owner ((pkg cfgl-package))
@@ -1269,7 +1273,7 @@ USEDP if non-nil indicates that made packages are used packages."
 
 (defun configuration-layer//filter-distant-packages
     (packages usedp &optional predicate)
-  "Return the distant packages (i.e., to be installed).
+  "Return the distant packages (ie to be intalled).
 If USEDP is non nil then returns only the used packages; if it is nil then
 return both used and unused packages.
 PREDICATE is an additional expression that eval to a boolean."
@@ -1685,10 +1689,6 @@ RNAME is the name symbol of another existing layer."
     (unless (package-installed-p pkg-name min-version)
       (condition-case-unless-debug err
           (cond
-           ((eq 'site location)
-            (configuration-layer//error
-             "Cannot install package `%s' from ELPA.  It is a site package and must be installed with your Emacs distribution"
-             pkg-name))
            ((or (null pkg) (eq 'elpa location))
             (configuration-layer//install-from-elpa pkg-name)
             (when pkg (oset pkg lazy-install nil)))
@@ -1976,7 +1976,9 @@ RNAME is the name symbol of another existing layer."
                  (let* ((owner (configuration-layer/get-layer owner)))
                    (when owner (oref owner dir))))))
       (if dir
-          (file-name-as-directory (format "%slocal/%S/" dir pkg-name))
+          (and-let* ((path (format "%slocal/%S/" dir pkg-name))
+                     ((file-exists-p path)))
+            path)
         (configuration-layer//warning
          "Cannot find path location path for package %S." pkg-name)
         nil)))))
@@ -2190,7 +2192,7 @@ in the back-up directory."
          (format "--> preparing update of package %s... [%s/%s]"
                  pkg upgraded-count upgrade-count) t)
         (spacemacs//redisplay)
-        (configuration-layer//package-delete pkg)
+        (configuration-layer//package-delete (cadr (assq pkg package-alist)))
         (setq configuration-layer--packages-to-update
               (delq pkg configuration-layer--packages-to-update))))
     (spacemacs-buffer/append

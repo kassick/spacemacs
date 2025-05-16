@@ -20,7 +20,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
+(require 'ert-x)
 (require 'mocker)
 (require 'core-command-line)
 (require 'core-configuration-layer)
@@ -379,12 +379,12 @@
     (helper--add-layers `(,(cfgl-layer :name 'layer1)) t)
     (should (not (cfgl-package-distant-p pkg)))))
 
-(ert-deftest test-cfgl-package-distant-p--site-is-distant ()
+(ert-deftest test-cfgl-package-distant-p--site-is-not-distant ()
   (let ((pkg (cfgl-package :name 'testpkg
                            :owners '(layer1)
                            :location 'site)))
     (helper--add-layers `(,(cfgl-layer :name 'layer1)) t)
-    (should (cfgl-package-distant-p pkg))))
+    (should (not (cfgl-package-distant-p pkg)))))
 
 (ert-deftest test-cfgl-package-distant-p--local-is-not-distant ()
   (let ((pkg (cfgl-package :name 'testpkg
@@ -1512,7 +1512,7 @@
          (configuration-layer--indexed-packages (make-hash-table)))
     (helper--add-packages test-filter-distant-packages--test-data t)
     (should
-     (equal '(pkg9 pkg8 pkg6 pkg5 pkg2)
+     (equal '(pkg9 pkg8 pkg6 pkg5)
             (configuration-layer//filter-distant-packages packages t)))))
 
 (ert-deftest test-filter-distant-packages--return-only-unused-packages ()
@@ -1522,7 +1522,7 @@
         (configuration-layer--indexed-packages (make-hash-table)))
     (helper--add-packages test-filter-distant-packages--test-data t)
     (should
-     (equal '(pkg18 pkg17 pkg16 pkg15 pkg14 pkg11 pkg9 pkg8 pkg7 pkg6 pkg5 pkg2)
+     (equal '(pkg18 pkg17 pkg16 pkg15 pkg14 pkg9 pkg8 pkg7 pkg6 pkg5)
             (configuration-layer//filter-distant-packages packages nil)))))
 
 ;; ---------------------------------------------------------------------------
@@ -2387,34 +2387,39 @@
 
 (ert-deftest
     test-configure-packages-2--local-package-w/-layer-owner-update-load-path()
-  (let ((pkg (cfgl-package :name 'pkg :owners '(layer1) :location 'local))
-        configuration-layer--used-layers
-        (configuration-layer--indexed-layers (make-hash-table))
-        configuration-layer--used-packages
-        (configuration-layer--indexed-packages (make-hash-table))
-        (expected-load-path load-path)
-        (mocker-mock-default-record-cls 'mocker-stub-record))
-    (helper--add-layers `(,(cfgl-layer :name 'layer1 :dir "/path/")) t)
-    (helper--add-packages (list pkg) t)
-    (mocker-let
-        ((configuration-layer//configure-package (p) ((:occur 1))))
+ (ert-with-temp-directory directory
+   (let ((pkg (cfgl-package :name 'pkg :owners '(layer1) :location 'local))
+         (pkg-dir (expand-file-name "local/pkg/" directory))
+         configuration-layer--used-layers
+         (configuration-layer--indexed-layers (make-hash-table))
+         configuration-layer--used-packages
+         (configuration-layer--indexed-packages (make-hash-table))
+         (expected-load-path load-path)
+         (mocker-mock-default-record-cls 'mocker-stub-record))
+     (helper--add-layers `(,(cfgl-layer :name 'layer1 :dir directory)) t)
+     (mkdir pkg-dir 'recursive)         ; make sure the package dir exists
+     (helper--add-packages (list pkg) t)
+     (mocker-let
+      ((configuration-layer//configure-package (p) ((:occur 1))))
       (configuration-layer//configure-packages-2 `(,(oref pkg name)))
-      (push "/path/local/pkg/" expected-load-path)
-      (should (equal expected-load-path load-path)))))
+      (push pkg-dir expected-load-path)
+      (should (equal expected-load-path load-path))))))
 
 (ert-deftest
     test-configure-packages-2--local-package-w/-dotfile-owner-update-load-path()
-  (let ((pkg (cfgl-package :name 'pkg :owners '(dotfile) :location 'local))
-        configuration-layer--used-packages
-        (configuration-layer--indexed-packages (make-hash-table))
-        (expected-load-path load-path)
-        (mocker-mock-default-record-cls 'mocker-stub-record))
-    (helper--add-packages (list pkg) t)
-    (configuration-layer//configure-packages-2 `(,(oref pkg name)))
-    (push (file-name-as-directory
-           (concat spacemacs-private-directory "local/pkg"))
-          expected-load-path)
-    (should (equal expected-load-path load-path))))
+  (ert-with-temp-directory directory
+    (let ((spacemacs-private-directory directory)
+          (pkg (cfgl-package :name 'pkg :owners '(dotfile) :location 'local))
+          (pkg-dir (expand-file-name "local/pkg/" directory))
+          configuration-layer--used-packages
+          (configuration-layer--indexed-packages (make-hash-table))
+          (expected-load-path load-path)
+          (mocker-mock-default-record-cls 'mocker-stub-record))
+      (make-directory pkg-dir 'recursive) ; make sure the package dir exists
+      (helper--add-packages (list pkg) t)
+      (configuration-layer//configure-packages-2 `(,(oref pkg name)))
+      (push pkg-dir expected-load-path)
+      (should (equal expected-load-path load-path)))))
 
 (ert-deftest
     test-configure-packages-2--local-package-w/o-owner-doesnt-update-load-path()
