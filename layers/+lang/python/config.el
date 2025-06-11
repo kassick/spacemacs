@@ -1,4 +1,4 @@
-;;; config.el --- Python Layer Configuration File for Spacemacs
+;;; config.el --- Python Layer Configuration File for Spacemacs  -*- lexical-binding: nil; -*-
 ;;
 ;; Copyright (c) 2012-2025 Sylvain Benner & Contributors
 ;;
@@ -104,8 +104,6 @@ Possible values are `on-visit', `on-project-switch' or `nil'.")
 (defvar spacemacs--python-poetry-modes nil
   "List of major modes where to add poetry support.")
 
-(defvar spacemacs--python-shell-interpreter-origin nil
-  "Origin python-shell-interpreter value.")
 ;; inferior-python-mode needs these variables to be defined.  The python
 ;; package declares them but does not initialize them.
 (defvar python-shell--interpreter nil)
