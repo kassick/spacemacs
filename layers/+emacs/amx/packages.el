@@ -1,8 +1,8 @@
-;;; layers.el --- Gleam layer layers file for Spacemacs.  -*- lexical-binding: nil; -*-
+;;; packages.el --- amx Layer packages File for Spacemacs  -*- lexical-binding: nil; -*-
 ;;
 ;; Copyright (c) 2012-2025 Sylvain Benner & Contributors
 ;;
-;; Author: Qynn Schwaab <qynn@riseup.net>
+;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
 ;;
 ;; This file is not part of GNU Emacs.
@@ -21,6 +21,19 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-(configuration-layer/declare-layer-dependencies
- (append '(tree-sitter)
-         (if (and (boundp 'gleam-enable-lsp) gleam-enable-lsp) '(lsp) '())))
+(setq amx-packages '(amx))
+
+(defun amx/init-amx ()
+  (use-package amx
+    :defer t
+    :init
+    (setq-default amx-history-length 32
+                  amx-save-file (concat spacemacs-cache-directory
+                                         ".amx-items"))
+    ;; define the key binding at the very end in order to allow the user
+    ;; to overwrite any key binding
+    (add-hook 'emacs-startup-hook
+              (lambda () (spacemacs/set-leader-keys
+                           dotspacemacs-emacs-command-key 'spacemacs/amx)))
+    (spacemacs/set-leader-keys "m:" 'spacemacs/amx-major-mode-commands)
+    (global-set-key (kbd "M-x") 'spacemacs/amx)))
