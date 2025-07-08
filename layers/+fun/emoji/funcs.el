@@ -33,7 +33,7 @@
                         frame 'prepend))
      ((spacemacs/system-is-linux)
       (set-fontset-font t 'symbol
-                        (font-spec :family "Symbola")
+                        (font-spec :family "Iosevka")
                         frame 'prepend)))))
 
 (defun spacemacs//set-emoji-font-for-current-frame ()
