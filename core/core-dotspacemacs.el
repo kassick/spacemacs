@@ -114,7 +114,7 @@ state and should only be used for testing."
   'boolean
   'spacemacs-dotspacemacs-init)
 
-(spacemacs|defc dotspacemacs-verify-spacelpa-archives nil
+(spacemacs|defc dotspacemacs-verify-spacelpa-archives t
   "If non-nil then verify the signature for downloaded Spacelpa archives."
   'boolean
   'spacemacs-dotspacemacs-init)
@@ -250,7 +250,10 @@ whenever you start Emacs."
   'boolean
   'spacemacs-dotspacemacs-init)
 
-(spacemacs|defc dotspacemacs-configuration-layers '(emacs-lisp)
+(spacemacs|defc dotspacemacs-configuration-layers '(emacs-lisp
+                                                    helm
+                                                    multiple-cursors
+                                                    treemacs)
   "List of configuration layers to load."
   '(repeat (choice symbol (cons symbol sexp)))
   'spacemacs-dotspacemacs-layers)
@@ -669,10 +672,10 @@ by default."
   '(choice (const nil) (const all) (const trailing) (const changed))
   'spacemacs-dotspacemacs-init)
 
-(spacemacs|defc dotspacemacs-search-tools '("rg" "ag" "pt" "ack" "grep")
+(spacemacs|defc dotspacemacs-search-tools '("rg" "ag" "ack" "grep")
   "List of search tool executable names. Spacemacs uses the first installed
-tool of the list. Supported tools are `rg', `ag', `pt', `ack' and `grep'."
-  '(set (const "rg") (const "ag") (const "pt") (const "ack") (const "grep"))
+tool of the list. Supported tools are `rg', `ag', `ack' and `grep'."
+  '(set (const "rg") (const "ag") (const "ack") (const "grep"))
   'spacemacs-dotspacemacs-init)
 
 (spacemacs|defc dotspacemacs-startup-lists '((recents  . 5)
@@ -731,7 +734,7 @@ visiting README.org files of Spacemacs."
   'boolean
   'spacemacs-dotspacemacs-init)
 
-(spacemacs|defc dotspacemacs-new-empty-buffer-major-mode nil
+(spacemacs|defc dotspacemacs-new-empty-buffer-major-mode 'text-mode
   "Set the major mode for a new empty buffer."
   'symbol
   'spacemacs-dotspacemacs-init)
