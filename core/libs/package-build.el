@@ -14,7 +14,7 @@
 ;; Package-Version: 4.0.0.50-git
 ;; Package-Requires: (
 ;;     (emacs  "26.1")
-;;     (compat "30.1"))
+;;     (compat "31.0"))
 
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -489,7 +489,7 @@ or snapshots are build.")
 (defun package-build--release-placeholder ()
   ;; Always use at least three zero components before the snapshot
   ;; component, even if `package-build-minimal-release-components' asks
-  ;; for fewer.  Subtract one because the separator is added elsewhwere.
+  ;; for fewer.  Subtract one because the separator is added elsewhere.
   (make-list (1- (max 3 package-build-minimal-release-components)) 0))
 
 ;;;; Tag
@@ -1033,7 +1033,8 @@ Use a sandbox if `package-build--use-sandbox' is non-nil."
        (unless package-build--inhibit-fetch
          (let ((default-directory dir))
            (package-build--message "Updating %s" dir)
-           (package-build--call-process rcp "git" "fetch" "-f" "--tags" "origin")
+           (package-build--call-process
+            rcp "git" "fetch" "-f" "--tags" "--prune" "--prune-tags" "origin")
            ;; We might later checkout "origin/HEAD". Sadly "git fetch"
            ;; cannot be told to keep it up-to-date, so we have to make
            ;; a second request.
@@ -1174,7 +1175,7 @@ that is put in the tarball."
           (process-environment process-environment))
       (when (eq system-type 'darwin)
         ;; Files whose name begin with ._ are added to tarballs
-        ;; by, default, but at least we can turn that off.  See
+        ;; by default, but at least we can turn that off.  See
         ;; also https://superuser.com/a/260264.
         (setenv "COPYFILE_DISABLE" "true"))
       (process-file
@@ -2031,6 +2032,43 @@ a package."
   "Dump the build packages list to FILE as json."
   (with-temp-file file
     (insert (json-encode (package-build--archive-alist-for-json)))))
+
+;;; Webpage
+
+(defun package-build--format-webpage (file dir)
+  (when (file-exists-p file)
+    (with-temp-file (expand-file-name file dir)
+      (save-excursion (insert-file-contents file))
+      (while (re-search-forward "${\\([^}]+\\)}" nil t)
+        (cond
+          ((string-prefix-p "list-" (match-string 1))
+           (let* ((channel (substring (match-string 1) 5))
+                  (beg (match-beginning 0))
+                  (col (- beg (save-excursion (goto-char beg) (pos-bol))))
+                  (sep (concat "\n" (make-string col ?\s)))
+                  (cnt (expand-file-name
+                        "archive-contents"
+                        (if (equal dir channel) dir (concat dir "/" channel))))
+                  (sig (concat cnt ".sig"))
+                  (pkgs (package-build-archive-alist cnt))
+                  (signed (file-exists-p sig)))
+             (replace-match "")
+             (insert
+              (mapconcat
+               (lambda (pkg)
+                 (pcase-let* ((`(,pkg . [,ver ,_ ,desc ,_ ,alist]) pkg)
+                              (ver (package-version-join ver))
+                              (url (alist-get :url alist))
+                              (pre (format "%s/%s" channel pkg)))
+                   (concat
+                    (format "<li><a href=\"%s\">%s</a> — " url pkg)
+                    (format "<a href=\"%s-%s.tar\">%s</a> " pre ver ver)
+                    (if signed
+                        (format "(<a href=\"%s-%s.tar.sig\">sig</a>) " pre ver)
+                      "— ")
+                    (format "<a href=\"%s-readme.txt\">%s</a></li>" pre desc))))
+               pkgs sep))))
+          ((replace-match (or (getenv (match-string 1)) "") t t)))))))
 
 ;;; _
 
